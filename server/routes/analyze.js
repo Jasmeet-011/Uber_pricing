@@ -56,34 +56,34 @@ Description:
         .json({ error: "Invalid response from Gemini API" });
     }
 
-    const lines = modelResponse.split("\n").filter(Boolean);
+    const lines = modelResponse
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => line.replace(/[*\s**]/g, "").trim()); // Clean up the markdown and bullet points
 
-    // Parse Gemini's response
+    console.log("Cleaned lines from Gemini response:", lines);
+
+    // Parse Gemini's response with more precise splitting
     const parsed = {
-      projectType: lines[0]
-        ?.split(":")[1]
-        ?.trim()
-        ?.replace(/[\*\*\s]/g, ""), // Remove '**' and extra spaces
-      features: lines[1]
+      projectType: lines[1]?.split(":")[1]?.trim(),
+      features: lines[2]
         ?.split(":")[1]
         ?.split(",")
-        .map((f) => f.trim().replace(/[\*\*\s]/g, "")), // Remove '**' and extra spaces
-      complexity: lines[2]
-        ?.split(":")[1]
-        ?.trim()
-        ?.replace(/[\*\*\s]/g, ""), // Remove '**' and extra spaces
-      timeline:
-        lines[3]?.split(":")[1]?.trim() === "Not Specified"
-          ? null
-          : parseInt(lines[3]?.split(":")[1]),
+        .map((f) => f.trim()),
+      complexity: lines[3]?.split(":")[1]?.trim(),
+      timeline: lines[4]?.split(":")[1]?.trim(),
     };
 
-    // Temporarily bypass the validation check to log parsed result for debugging
+    // Log parsed result to see the cleaned values
+    console.log("Parsed result:", parsed);
+
+    // Check if any of the fields are missing or incorrect
     if (
       !parsed.projectType ||
       !Array.isArray(parsed.features) ||
+      !parsed.features.length ||
       !parsed.complexity ||
-      (parsed.timeline !== null && isNaN(parsed.timeline))
+      (parsed.timeline !== "Not Specified" && isNaN(parseInt(parsed.timeline)))
     ) {
       console.warn("Parsed result incomplete:", parsed);
       return res
@@ -91,8 +91,9 @@ Description:
         .json({ error: "Failed to extract required fields from response." });
     }
 
-    // If timeline is null, set a default value (e.g., 4 weeks)
-    const timelineWeeks = parsed.timeline || 4;
+    // Handle the case where the timeline is missing or invalid
+    const timelineWeeks =
+      parsed.timeline === "Not Specified" ? 4 : parseInt(parsed.timeline);
 
     // Calculate pricing based on extracted data
     const pricing = calculatePricing(
