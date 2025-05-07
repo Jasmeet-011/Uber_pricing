@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { mockAnalyzePricing } from '@/services/apiService';
+import { analyzePricing } from '@/services/apiService'; // Updated import
 import { useToast } from '@/hooks/use-toast';
 import { Terminal } from "lucide-react";
 
@@ -17,25 +16,21 @@ export function PricingInput({ onPricingUpdate, setIsLoading }: PricingInputProp
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Sample descriptions for testing
   const sampleDescriptions = [
     "A web application with user authentication and a product catalog.",
     "A mobile app with in-app purchases, real-time notifications, and a chat system."
   ];
 
   useEffect(() => {
-    // Don't fetch on empty description
     if (!description.trim()) {
       onPricingUpdate(null);
       return;
     }
 
-    // Clear any existing timeout
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
 
-    // Set a new timeout
     const timeout = setTimeout(() => {
       fetchPricing(description);
     }, 500);
@@ -54,8 +49,7 @@ export function PricingInput({ onPricingUpdate, setIsLoading }: PricingInputProp
 
     setIsLoading(true);
     try {
-      // Use mockAnalyzePricing instead of actual API call for demo
-      const result = await mockAnalyzePricing(text);
+      const result = await analyzePricing(text); // Using real API now
       onPricingUpdate(result);
     } catch (error) {
       toast({

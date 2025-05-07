@@ -26,7 +26,7 @@ export function PricingOutput({ pricingData, isLoading }: PricingOutputProps) {
         <div className="w-20 h-20 flex items-center justify-center rounded-full bg-muted/30 mb-6">
           <DollarSign className="h-10 w-10 text-muted-foreground" />
         </div>
-        <CardTitle className="mb-3">Enter Your Project Description</CardTitle>
+        <CardTitle className="mb-3"> Your Project Analyses</CardTitle>
         <CardDescription className="text-center max-w-md">
           We'll analyze your project and provide a detailed cost breakdown based on our advanced AI algorithms.
         </CardDescription>

@@ -26,7 +26,7 @@ Extract the following details from this project description:
 
 Description:
 "${description}"
-`;
+    `;
 
     // Send prompt to Gemini API
     const response = await axios.post(
@@ -43,8 +43,12 @@ Description:
       }
     );
 
+    // Extract the response text from Gemini
     const modelResponse =
       response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    // Log Gemini response to debug
+    console.log("Gemini response:", modelResponse);
 
     if (!modelResponse) {
       return res
@@ -56,35 +60,56 @@ Description:
 
     // Parse Gemini's response
     const parsed = {
-      projectType: lines[0]?.split(":")[1]?.trim(),
+      projectType: lines[0]
+        ?.split(":")[1]
+        ?.trim()
+        ?.replace(/[\*\*\s]/g, ""), // Remove '**' and extra spaces
       features: lines[1]
         ?.split(":")[1]
         ?.split(",")
-        .map((f) => f.trim()),
-      complexity: lines[2]?.split(":")[1]?.trim(),
-      timeline: parseInt(lines[3]?.split(":")[1]),
+        .map((f) => f.trim().replace(/[\*\*\s]/g, "")), // Remove '**' and extra spaces
+      complexity: lines[2]
+        ?.split(":")[1]
+        ?.trim()
+        ?.replace(/[\*\*\s]/g, ""), // Remove '**' and extra spaces
+      timeline:
+        lines[3]?.split(":")[1]?.trim() === "Not Specified"
+          ? null
+          : parseInt(lines[3]?.split(":")[1]),
     };
 
-    // Validate parsed values
+    // Temporarily bypass the validation check to log parsed result for debugging
     if (
       !parsed.projectType ||
-      !parsed.features ||
+      !Array.isArray(parsed.features) ||
       !parsed.complexity ||
-      isNaN(parsed.timeline)
+      (parsed.timeline !== null && isNaN(parsed.timeline))
     ) {
+      console.warn("Parsed result incomplete:", parsed);
       return res
         .status(400)
         .json({ error: "Failed to extract required fields from response." });
     }
 
+    // If timeline is null, set a default value (e.g., 4 weeks)
+    const timelineWeeks = parsed.timeline || 4;
+
     // Calculate pricing based on extracted data
     const pricing = calculatePricing(
       parsed.features.length,
       parsed.complexity,
-      parsed.timeline
+      timelineWeeks
     );
 
-    res.json({ parsed, pricing });
+    // Return pricing response in the correct structure
+    res.json({
+      human_hours: pricing.humanHours,
+      human_cost: parseFloat(pricing.humanCost.slice(1)), // Removing the "$" sign
+      ai_cost: parseFloat(pricing.aiCost.slice(1)), // Removing the "$" sign
+      complexity: parsed.complexity,
+      complexity_surcharge: parseFloat(pricing.surcharge.replace("%", "")), // Converting to percentage
+      total_cost: parseFloat(pricing.totalCost.slice(1)), // Removing the "$" sign
+    });
   } catch (err) {
     console.error("Gemini API Error:", err.response?.data || err.message);
     res.status(500).send("Gemini API request failed");
