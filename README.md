@@ -18,6 +18,7 @@ React + Vite	Node.js + Express	Google Gemini LLM API
 Tailwind CSS + ShadCN UI	CORS, dotenv, axios	Cost calculation service logic
 
 📁 Project Structure
+```
 Uber_pricing/
 ├── server/                  # Express backend
 │   ├── routes/              # /analyze endpoint using Gemini API
@@ -27,6 +28,7 @@ Uber_pricing/
 │   ├── components/          # Reusable UI components
 │   ├── pages/Index.tsx     # Main page
 │   └── apiService.ts       # Handles backend API calls
+```
 🧪 Example Input
 "A mobile app with login, chat, and notifications. Completion is expected in 3 weeks."
 
