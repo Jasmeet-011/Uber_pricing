@@ -10,13 +10,13 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
 
 router.post("/", async (req, res) => {
   const { description } = req.body;
+  console.log("API called with description:", description);
 
   if (!description || description.trim() === "") {
     return res.status(400).json({ error: "Description is required." });
   }
 
   try {
-    // Prompt sent to Gemini to extract relevant details
     const prompt = `
 Extract the following details from this project description:
 - Project Type
@@ -28,7 +28,6 @@ Description:
 "${description}"
     `;
 
-    // Send prompt to Gemini API
     const response = await axios.post(
       GEMINI_API_URL,
       {
@@ -43,11 +42,9 @@ Description:
       }
     );
 
-    // Extract the response text from Gemini
     const modelResponse =
       response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    // Log Gemini response to debug
     console.log("Gemini response:", modelResponse);
 
     if (!modelResponse) {
@@ -59,31 +56,43 @@ Description:
     const lines = modelResponse
       .split("\n")
       .filter(Boolean)
-      .map((line) => line.replace(/[*\s**]/g, "").trim()); // Clean up the markdown and bullet points
+      .map((line) => line.replace(/[*`_]/g, "").trim());
 
     console.log("Cleaned lines from Gemini response:", lines);
 
-    // Parse Gemini's response with more precise splitting
-    const parsed = {
-      projectType: lines[1]?.split(":")[1]?.trim(),
-      features: lines[2]
+    const getField = (label) =>
+      lines
+        .find((l) => l.toLowerCase().startsWith(label.toLowerCase()))
         ?.split(":")[1]
-        ?.split(",")
-        .map((f) => f.trim()),
-      complexity: lines[3]?.split(":")[1]?.trim(),
-      timeline: lines[4]?.split(":")[1]?.trim(),
+        ?.trim();
+
+    const featuresLine = getField("Features");
+    const features = featuresLine
+      ? featuresLine.split(",").map((f) => f.trim())
+      : [];
+
+    const parsed = {
+      projectType: getField("Project Type"),
+      features,
+      complexity: getField("Complexity"),
+      timeline: getField("Timeline"),
     };
 
-    // Log parsed result to see the cleaned values
     console.log("Parsed result:", parsed);
 
-    // Check if any of the fields are missing or incorrect
+    // Normalize timeline
+    const timelineText = parsed.timeline?.toLowerCase() || "";
+    const timelineWeeks =
+      timelineText.includes("not specified") || isNaN(parseInt(parsed.timeline))
+        ? 4
+        : parseInt(parsed.timeline);
+
+    // Validate required fields
     if (
       !parsed.projectType ||
       !Array.isArray(parsed.features) ||
       !parsed.features.length ||
-      !parsed.complexity ||
-      (parsed.timeline !== "Not Specified" && isNaN(parseInt(parsed.timeline)))
+      !parsed.complexity
     ) {
       console.warn("Parsed result incomplete:", parsed);
       return res
@@ -91,25 +100,19 @@ Description:
         .json({ error: "Failed to extract required fields from response." });
     }
 
-    // Handle the case where the timeline is missing or invalid
-    const timelineWeeks =
-      parsed.timeline === "Not Specified" ? 4 : parseInt(parsed.timeline);
-
-    // Calculate pricing based on extracted data
     const pricing = calculatePricing(
       parsed.features.length,
       parsed.complexity,
       timelineWeeks
     );
 
-    // Return pricing response in the correct structure
     res.json({
       human_hours: pricing.humanHours,
-      human_cost: parseFloat(pricing.humanCost.slice(1)), // Removing the "$" sign
-      ai_cost: parseFloat(pricing.aiCost.slice(1)), // Removing the "$" sign
+      human_cost: parseFloat(pricing.humanCost.slice(1)),
+      ai_cost: parseFloat(pricing.aiCost.slice(1)),
       complexity: parsed.complexity,
-      complexity_surcharge: parseFloat(pricing.surcharge.replace("%", "")), // Converting to percentage
-      total_cost: parseFloat(pricing.totalCost.slice(1)), // Removing the "$" sign
+      complexity_surcharge: parseFloat(pricing.surcharge.replace("%", "")),
+      total_cost: parseFloat(pricing.totalCost.slice(1)),
     });
   } catch (err) {
     console.error("Gemini API Error:", err.response?.data || err.message);

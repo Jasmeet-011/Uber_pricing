@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ export function Header() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
-    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -24,6 +22,7 @@ export function Header() {
       <div className="container h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`${scrolled || mobileMenuOpen ? 'bg-uber-black dark:bg-white' : 'bg-white/90'} text-white dark:text-uber-black p-2 rounded-md`}>
+            {/* Logo */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -52,28 +51,29 @@ export function Header() {
             scrolled || mobileMenuOpen ? 'text-foreground' : 'text-white'
           }`}>AI Pricing Engine</h1>
         </div>
-        
-        {/* Desktop Navigation */}
+
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
           <nav className="flex items-center gap-6">
             <a href="#pricing" className={`text-sm font-medium hover:text-primary transition-colors ${
               scrolled ? 'text-foreground' : 'text-white'
             }`}>Pricing</a>
-            <a href="#" className={`text-sm font-medium hover:text-primary transition-colors ${
+            <a href="#features" className={`text-sm font-medium hover:text-primary transition-colors ${
               scrolled ? 'text-foreground' : 'text-white'
             }`}>Features</a>
-            <a href="#" className={`text-sm font-medium hover:text-primary transition-colors ${
+            <a href="#examples" className={`text-sm font-medium hover:text-primary transition-colors ${
               scrolled ? 'text-foreground' : 'text-white'
             }`}>Examples</a>
-            <a href="#" className={`text-sm font-medium hover:text-primary transition-colors ${
+            <a href="#about" className={`text-sm font-medium hover:text-primary transition-colors ${
               scrolled ? 'text-foreground' : 'text-white'
             }`}>About</a>
           </nav>
           <ThemeToggle />
-          <Button className="bg-uber-blue hover:bg-uber-blue/90 text-white">Get Started</Button>
+          <a href="#pricing">
+          <Button className="bg-uber-blue hover:bg-uber-blue/90 text-white">Get Started</Button></a>
         </div>
-        
-        {/* Mobile Navigation Button */}
+
+        {/* Mobile Nav Toggle */}
         <div className="flex items-center gap-4 md:hidden">
           <ThemeToggle />
           <button
@@ -90,26 +90,28 @@ export function Header() {
           </button>
         </div>
       </div>
-      
-      {/* Mobile Menu */}
+
+      {/* Mobile Nav Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 top-20 z-20 bg-background/95 backdrop-blur-sm p-6 flex flex-col md:hidden animate-fade-in">
           <nav className="flex flex-col space-y-6 text-lg font-medium pt-6">
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
               Pricing
             </a>
-            <a href="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
               Features
             </a>
-            <a href="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
+            <a href="#examples" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
               Examples
             </a>
-            <a href="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
+            <a href="#about" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary">
               About
             </a>
+            <a href="#pricing">
             <Button className="w-full bg-uber-blue hover:bg-uber-blue/90 text-white mt-4">
               Get Started
             </Button>
+            </a>
           </nav>
         </div>
       )}

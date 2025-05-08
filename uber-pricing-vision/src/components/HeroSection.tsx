@@ -25,9 +25,11 @@ export function HeroSection() {
             Transform project planning with our AI-powered estimation tool that delivers accurate pricing in seconds.
           </p>
           <div className="flex flex-wrap gap-4">
+            <a href="#pricing">
             <Button size="lg" className="bg-uber-blue hover:bg-uber-blue/90 text-white">
               Get Started
             </Button>
+            </a>
             <Button size="lg" variant="outline" className="text-white border-white/30 hover:bg-white/10">
               Learn More
             </Button>

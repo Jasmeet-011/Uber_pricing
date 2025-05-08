@@ -105,9 +105,11 @@ export function FeatureSection() {
                 Start using our AI pricing engine today and experience the future of project estimation.
               </p>
               <div className="flex justify-center gap-4 flex-wrap">
+                <a href="#pricing">
                 <Button size="lg" className="bg-white text-uber-blue hover:bg-white/90">
                   Get Started Now
                 </Button>
+                </a>
                 <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
                   Schedule a Demo
                 </Button>

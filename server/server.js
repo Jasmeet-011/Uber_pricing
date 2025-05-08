@@ -6,6 +6,7 @@ require("dotenv").config();
 const analyzeRoute = require("./routes/analyze");
 
 const app = express();
+console.log("CORS Origin:", process.env.FRONTEND_ORIGIN); // DEBUG
 
 // Allow cross-origin requests from your front-end client
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN }));
