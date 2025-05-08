@@ -22,7 +22,7 @@ export async function analyzePricing(
   }
 
   try {
-    const response = await fetch('http://localhost:5000/analyze', {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

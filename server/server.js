@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const PORT = process.env.PORT || 5000;
 
 const analyzeRoute = require("./routes/analyze");
 
@@ -20,5 +21,5 @@ app.use("/analyze", analyzeRoute);
 // Health check route to verify the server is running
 app.get("/", (req, res) => res.send("AI Pricing Backend Running"));
 
-// Start the server on port 5000
-app.listen(5000, () => console.log("Server started on port 5000"));
+// Start the server on port
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
